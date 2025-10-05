@@ -18,6 +18,10 @@ def get_distance_matrix(filename):
     
     return distances
 
-distances = get_distance_matrix("C:/Users/Likhit/OneDrive/Desktop/Masters/Q1/Optimization of Data  Science/TTP/Data/NL6.xml")
-for row in distances:
-    print(row)
+def get_names(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+
+    teams_section = root.find('.//Teams')
+    team_names = [team.attrib['name'] for team in teams_section.findall('team')]
+    return team_names
