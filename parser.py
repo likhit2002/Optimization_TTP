@@ -1,6 +1,6 @@
 import xml.etree.ElementTree as ET
 
-def parse_xml(filename):
+def parse_ttp_data(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
 
@@ -28,12 +28,3 @@ def parse_xml(filename):
 
     return n_teams, team_names, distances, constraints
 
-n_teams, team_names, distances, constraints = parse_xml("Data/NL6.xml")
-print("Number of teams:", n_teams)
-print("Teams:", team_names)
-print("Distances :")
-for row in distances:
-    print(row)
-
-
-print("Constraints:", constraints)
