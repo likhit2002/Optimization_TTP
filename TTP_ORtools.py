@@ -19,7 +19,6 @@ class TTPSolver:
 
 
     def parse_ttp_data(self, filename):
-        """Parse XML file and extract tournament data"""
         tree = ET.parse(filename)
         root = tree.getroot()
 
@@ -50,7 +49,6 @@ class TTPSolver:
         return n, team_names, dist, L, U
 
     def solve_exact(self, time_limit=300):
-        """Build and solve CP-SAT model with y coupling constraints"""
         model = cp_model.CpModel()
         x, home, away = {}, {}, {}
 
