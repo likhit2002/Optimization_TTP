@@ -239,21 +239,15 @@ class TTPSolver:
             print(f" {t}: {c}")
 
     def print_xml_format(self, schedule):
-        """Print schedule in XML format"""
-        print("\n" + "="*50)
-        print("XML FORMAT OUTPUT:")
-        print("="*50)
-        print('<?xml version="1.0" encoding="utf-8"?>')
-        print('<Games>')
-    
+        
         for round_num in range(self.num_rounds):
             for away_team, home_team in schedule[round_num]:
-              print(f'  <ScheduledMatch away="{away_team}" home="{home_team}" slot="{round_num}"/>')
+              print(f'ScheduledMatch away="{away_team}" home="{home_team}" slot="{round_num}"')
     
         print('</Games>')
 
 if __name__ == "__main__":
-    solver = TTPSolver("Data/NL4.xml")
+    solver = TTPSolver("Data/NL6.xml")
     result = solver.solve_exact(time_limit=300)
 
     if result['schedule']:
