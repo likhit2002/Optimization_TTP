@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 from ortools.sat.python import cp_model
 import time
+import CSV_Export
 
 
 class TTPSolver:
@@ -243,12 +244,11 @@ class TTPSolver:
         for round_num in range(self.num_rounds):
             for away_team, home_team in schedule[round_num]:
               print(f'ScheduledMatch away="{away_team}" home="{home_team}" slot="{round_num}"')
-    
-        print('</Games>')
 
 if __name__ == "__main__":
     solver = TTPSolver("Data/NL6.xml")
-    result = solver.solve_exact(time_limit=300)
+    result = solver.solve_exact(time_limit=600)
 
     if result['schedule']:
         solver.print_xml_format(result['schedule'])
+        CSV_Export.export_schedule_to_csv(result["schedule"], result["team_names"], "schedule_ortools.csv")
