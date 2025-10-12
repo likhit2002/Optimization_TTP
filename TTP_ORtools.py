@@ -164,8 +164,8 @@ class TTPSolver:
         if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             schedule = self.extract_schedule(solver, x)
             total_cost = self.calculate_travel_cost(schedule)
-            self.display_results(schedule, total_cost, t_solve, 
-                               solver.StatusName(status), solver, home, away)
+            self.display_results_with_distances(schedule, total_cost, t_solve, solver.StatusName(status), solver, home, away)
+
         else:
             print(f"No solution found. Status: {solver.StatusName(status)}")
             print(f"Solve time: {t_solve:.2f} seconds")
@@ -245,10 +245,72 @@ class TTPSolver:
             for away_team, home_team in schedule[round_num]:
               print(f'ScheduledMatch away="{away_team}" home="{home_team}" slot="{round_num}"')
 
+    def print_schedule_with_distances(self, schedule):
+        """
+        Print the OR-Tools schedule with distances for each away trip.
+        Also prints the cumulative distance per round and total.
+        """
+        total_distance = 0
+        team_locations = list(range(self.n_teams))  # start at home
+
+        for r in range(self.num_rounds):
+            if r in schedule and schedule[r]:
+                print(f"Round {r+1}:")
+                round_distance = 0
+                new_locations = team_locations.copy()
+
+                for away, home in schedule[r]:
+                    from_city = team_locations[away]
+                    to_city = home
+                    dist = self.distances[from_city][to_city] if from_city != to_city else 0
+                    round_distance += dist
+                    total_distance += dist
+                    new_locations[away] = to_city
+
+                    print(f"  {self.team_names[away]} @ {self.team_names[home]}  "
+                          f"(from {self.team_names[from_city]} to {self.team_names[to_city]}, dist={dist})")
+
+                print(f"  Round {r+1} distance: {round_distance}\n")
+                team_locations = new_locations
+            else:
+                print(f"Round {r+1}: No games scheduled\n")
+
+        # return home
+        return_distance = 0
+        print("Return home trips:")
+        for team in range(self.n_teams):
+            if team_locations[team] != team:
+                dist = self.distances[team_locations[team]][team]
+                return_distance += dist
+                print(f"  {self.team_names[team]} returns home from {self.team_names[team_locations[team]]}, dist={dist}")
+
+        total_distance += return_distance
+        print(f"\nReturn-home distance total: {return_distance}")
+        print(f"Overall travel distance: {total_distance}")
+
+    def display_results_with_distances(self, schedule, total_cost, solve_time, status, solver, home, away):
+        """Enhanced results display with distance breakdown"""
+        print(f"\nOR-Tools Solver Results:")
+        print(f"Status: {status}")
+        print(f"Solve time: {solve_time:.2f}s")
+        print(f"Total travel cost: {total_cost}\n")
+        
+        # Print detailed schedule with distances
+        self.print_schedule_with_distances(schedule)
+        
+        # Print home/away patterns
+        print("\nHome/Away Pattern:")
+        print("=" * 60)
+        for i, name in enumerate(self.team_names):
+            pattern = ''.join('H' if solver.Value(home[i,r]) == 1 else 'A'
+                              for r in range(self.num_rounds))
+            print(f" {name}: {pattern}")
+
+
 if __name__ == "__main__":
-    solver = TTPSolver("Data/NL6.xml")
+    solver = TTPSolver("Data/NL4.xml")
     result = solver.solve_exact(time_limit=600)
 
     if result['schedule']:
         solver.print_xml_format(result['schedule'])
-        CSV_Export.export_schedule_to_csv(result["schedule"], result["team_names"], "schedule_ortools.csv")
+        #CSV_Export.export_schedule_to_csv(result["schedule"], result["team_names"], "schedule_ortools.csv")
